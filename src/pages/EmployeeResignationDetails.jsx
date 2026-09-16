@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ï»¿import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, CheckCircle2, Calendar, Clock, ClipboardCheck,
@@ -87,8 +87,8 @@ const EmployeeResignationDetails = () => {
   const daysRemaining = Math.max(0, noticePeriodTotal - daysCompleted);
   const progressPercent = Math.round((daysCompleted / noticePeriodTotal) * 100);
 
-  const fmtDate = (d) => !d ? "—" : new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-  const fmtDateTime = (d) => !d ? "—" : new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const fmtDate = (d) => !d ? "â€”" : new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  const fmtDateTime = (d) => !d ? "â€”" : new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   const statusCfg = {
     APPROVED: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-200", dot: "bg-emerald-500", icon: CheckCircle2 },
@@ -102,10 +102,10 @@ const EmployeeResignationDetails = () => {
   const timelineSteps = [
     { title: "Resignation Submitted",   desc: "Your request was submitted to HR",                 date: fmtDate(resignation.submittedOn),  done: true,  active: false },
     { title: "Under Admin Review",      desc: "Admin is reviewing your request",                  date: resignation.status !== "PENDING" ? fmtDate(resignation.reviewedOn) : "Pending", done: resignation.status !== "PENDING", active: resignation.status === "PENDING" },
-    { title: resignation.status === "REJECTED" ? "Resignation Rejected" : "Resignation Approved", desc: resignation.status === "REJECTED" ? "Your resignation was rejected" : "Resignation approved by admin", date: resignation.reviewedOn ? fmtDate(resignation.reviewedOn) : "—", done: (resignation.status === "APPROVED" || resignation.status === "COMPLETED") || resignation.status === "REJECTED", active: false },
+    { title: resignation.status === "REJECTED" ? "Resignation Rejected" : "Resignation Approved", desc: resignation.status === "REJECTED" ? "Your resignation was rejected" : "Resignation approved by admin", date: resignation.reviewedOn ? fmtDate(resignation.reviewedOn) : "â€”", done: (resignation.status === "APPROVED" || resignation.status === "COMPLETED") || resignation.status === "REJECTED", active: false },
     { title: "Notice Period Running",   desc: `${fmtDate(resDate)} ? ${fmtDate(lwd)}`,           date: `${daysCompleted}/${noticePeriodTotal} days`, done: daysRemaining === 0 && (resignation.status === "APPROVED" || resignation.status === "COMPLETED"), active: daysRemaining > 0 && (resignation.status === "APPROVED" || resignation.status === "COMPLETED") },
-    { title: "Exit Formalities",        desc: "Complete handover & exit process",                 date: "—", done: false, active: daysRemaining === 0 && (resignation.status === "APPROVED" || resignation.status === "COMPLETED") },
-    { title: "Separation Complete",     desc: "All formalities completed",                        date: "—", done: false, active: false },
+    { title: "Exit Formalities",        desc: "Complete handover & exit process",                 date: "â€”", done: false, active: daysRemaining === 0 && (resignation.status === "APPROVED" || resignation.status === "COMPLETED") },
+    { title: "Separation Complete",     desc: "All formalities completed",                        date: "â€”", done: false, active: false },
   ];
 
   const exitChecklist = resignation.exitChecklist?.length > 0 ? resignation.exitChecklist : [
@@ -184,7 +184,7 @@ const EmployeeResignationDetails = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Reason</p>
-                  <p className="text-[12px] font-bold text-slate-700">{resignation.reason || "—"}</p>
+                  <p className="text-[12px] font-bold text-slate-700">{resignation.reason || "â€”"}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Submitted On</p>
@@ -353,7 +353,7 @@ const EmployeeResignationDetails = () => {
                       <div className="flex-1 min-w-0 pb-1">
                         <p className={`text-[11px] font-black leading-tight ${step.done || step.active ? "text-slate-800" : "text-slate-400"}`}>{step.title}</p>
                         <p className="text-[10px] font-medium text-slate-400 leading-snug mt-0.5">{step.desc}</p>
-                        {step.date && step.date !== "—" && (
+                        {step.date && step.date !== "â€”" && (
                           <p className="text-[9px] font-bold text-slate-300 mt-0.5">{step.date}</p>
                         )}
                       </div>
