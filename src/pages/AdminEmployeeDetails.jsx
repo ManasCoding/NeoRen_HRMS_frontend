@@ -42,7 +42,7 @@ import PayslipsTab from '../components/employee/PayslipsTab';
 import * as XLSX from 'xlsx';
 import toast from 'react-hot-toast';
 
-const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000/api').replace('/api', '');
+const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL || 'https://citicon-hrms-backend.onrender.com/api').replace('/api', '');
 
 const AdminEmployeeDetails = () => {
   const { refreshKey } = useAttendance();

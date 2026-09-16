@@ -14,7 +14,7 @@ import api from '../services/api';
 import CustomDropdown from '../components/CustomDropdown';
 import AdminWeeklyTimesheet from '../components/AdminWeeklyTimesheet';
 
-const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:7000/api').replace('/api', '');
+const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL || 'https://citicon-hrms-backend.onrender.com/api').replace('/api', '');
 
 const COLORS = ['#3b82f6', '#10b981', '#a855f7', '#f43f5e', '#f59e0b', '#64748b'];
 
