@@ -273,7 +273,7 @@ const MaintenanceMode = () => {
               />
               <div className="mt-1">
                 <p className="text-[11px] font-medium text-slate-500 mb-0.5">Designed & Developed by</p>
-                <h4 className="text-[15px] font-bold text-slate-800 leading-none">Oditech Global</h4>
+                <h4 className="text-[15px] font-bold text-slate-800 leading-none">Oditech Global Pvt. Ltd.</h4>
                 <p className="text-[11px] text-slate-500 font-medium mt-1.5">Software & IT Solutions</p>
               </div>
             </div>

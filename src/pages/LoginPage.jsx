@@ -12,14 +12,25 @@ const LoginPage = ({ isAdmin = false }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const getPrefix = () => employeeType === 'regular' ? 'OG25' : 'OD-IN-';
+  const getPrefix = () => employeeType === 'regular' ? 'OG25' : 'CK';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
     try {
-      const finalLoginId = isAdmin ? loginId.trim() : `${getPrefix()}${employeeCode}`.trim();
+      let finalLoginId;
+      if (isAdmin) {
+        finalLoginId = loginId.trim();
+      } else {
+        const prefix = getPrefix();
+        const trimmedCode = employeeCode.trim();
+        if (trimmedCode.toUpperCase().startsWith(prefix.toUpperCase())) {
+          finalLoginId = trimmedCode;
+        } else {
+          finalLoginId = `${prefix}${trimmedCode}`;
+        }
+      }
       const cleanPassword = password.trim();
       const data = await login(finalLoginId, cleanPassword, isAdmin, isAdmin ? undefined : employeeType);
       if (data.success) {
@@ -80,14 +91,14 @@ const LoginPage = ({ isAdmin = false }) => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEmployeeType('intern')}
+                  onClick={() => setEmployeeType('kitchen')}
                   className={`flex-1 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-                    employeeType === 'intern'
+                    employeeType === 'kitchen'
                       ? 'bg-white text-slate-800 shadow-sm'
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  Intern
+                  Cloud Kitchen
                 </button>
               </div>
             )}
@@ -115,7 +126,7 @@ const LoginPage = ({ isAdmin = false }) => {
                     type="text"
                     id="login_id"
                     value={employeeCode}
-                    onChange={(e) => setEmployeeCode(e.target.value.replace(/[^0-9]/g, ''))}
+                    onChange={(e) => setEmployeeCode(e.target.value.replace(/[^0-9A-Za-z]/g, ''))}
                     className="flex-1 p-3.5 bg-transparent border-none text-sm text-text-main focus:outline-none focus:ring-0 w-full"
                     placeholder="001"
                     autoComplete="off"
@@ -173,7 +184,7 @@ const LoginPage = ({ isAdmin = false }) => {
       </div>
       
       <div className="fixed bottom-6 w-full text-center text-[10px] text-slate-300 font-black uppercase tracking-[0.3em]">
-        Designed & Developed by <span className="text-slate-400">ODITECH GLOBAL</span>
+        Designed & Developed by <span className="text-slate-400">ODITECH GLOBAL PVT. LTD.</span>
       </div>
     </div>
   );
