@@ -7,7 +7,7 @@ import {
 import { io } from 'socket.io-client';
 import api from '../services/api';
 
-const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL || 'https://citicon-hrms-backend.onrender.com/api').replace('/api', '');
+const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL || 'https://citicon-hrms-backend-03wr.onrender.com/api').replace('/api', '');
 
 const TIME_SLOTS = [
   '09:30 - 10:30',
