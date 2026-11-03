@@ -177,10 +177,6 @@ const LoginPage = ({ isAdmin = false }) => {
             </button>
           </form>
         </div>
-        
-        <div className="text-center mt-8 text-[0.85rem] text-slate-400">
-          © 2026 HR Management System. Secure portal.
-        </div>
       </div>
       
       <div className="fixed bottom-6 w-full text-center text-[10px] text-slate-300 font-black uppercase tracking-[0.3em]">
