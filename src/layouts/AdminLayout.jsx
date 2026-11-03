@@ -112,7 +112,7 @@ const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
           <div className="px-4 py-2 border-t border-white/5 mt-2">
             <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.1em] leading-relaxed">
               Designed & Developed by <br />
-              <span className="text-white/40">Manas Kumar Gumansingh</span>
+              <span className="text-white/40">ODITECH GLOBAL</span>
             </p>
           </div>
         </div>
@@ -158,7 +158,7 @@ const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
         {/* Footer Credit */}
         <footer className="mt-20 pb-10 border-t border-slate-100 pt-8 text-center">
           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">
-            Designed & Developed by <span className="text-slate-400">Manas Kumar Gumansingh</span>
+            Designed & Developed by <span className="text-slate-400">ODITECH GLOBAL</span>
           </p>
         </footer>
       </main>

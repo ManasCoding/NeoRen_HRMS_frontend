@@ -117,7 +117,7 @@ const MaintenanceMode = () => {
           {/* User Profile */}
           <div className="flex items-center gap-3 pl-2 border-l border-slate-100">
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-extrabold text-slate-800 leading-none">Manas kumar gumansingh</p>
+              <p className="text-xs font-extrabold text-slate-800 leading-none">{currentUser?.name || 'Oditech Global'}</p>
               <p className="text-[9px] font-black uppercase text-[#8b5cf6] tracking-wider mt-1">Super User</p>
             </div>
             <img 
@@ -265,7 +265,7 @@ const MaintenanceMode = () => {
             <div className="flex items-start gap-4">
               <img 
                 src="/demo/emp1.png" 
-                alt="Manas Kumar Gumansingh" 
+                alt="Oditech Global" 
                 className="w-14 h-14 rounded-full object-cover border border-slate-200"
                 onError={(e) => {
                   e.target.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop";
@@ -273,8 +273,8 @@ const MaintenanceMode = () => {
               />
               <div className="mt-1">
                 <p className="text-[11px] font-medium text-slate-500 mb-0.5">Designed & Developed by</p>
-                <h4 className="text-[15px] font-bold text-slate-800 leading-none">Manas Kumar gumansingh</h4>
-                <p className="text-[11px] text-slate-500 font-medium mt-1.5">Full Stack Developer</p>
+                <h4 className="text-[15px] font-bold text-slate-800 leading-none">Oditech Global</h4>
+                <p className="text-[11px] text-slate-500 font-medium mt-1.5">Software & IT Solutions</p>
               </div>
             </div>
 

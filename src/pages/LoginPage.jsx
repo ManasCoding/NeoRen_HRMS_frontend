@@ -172,7 +172,7 @@ const LoginPage = ({ isAdmin = false }) => {
       </div>
       
       <div className="fixed bottom-6 w-full text-center text-[10px] text-slate-300 font-black uppercase tracking-[0.3em]">
-        Designed & Developed by <span className="text-slate-400">Manas Kumar Gumansingh</span>
+        Designed & Developed by <span className="text-slate-400">ODITECH GLOBAL</span>
       </div>
     </div>
   );

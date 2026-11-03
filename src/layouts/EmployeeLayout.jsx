@@ -151,7 +151,7 @@ const EmployeeLayout = ({ children, title, subtitle }) => {
         {/* Footer Credit */}
         <footer className="mt-20 pb-10 border-t border-slate-200 pt-8 text-center">
           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">
-            Designed & Developed by <span className="text-slate-400">Manas Kumar Gumansingh</span>
+            Designed & Developed by <span className="text-slate-400">ODITECH GLOBAL</span>
           </p>
         </footer>
         <div className="py-6 text-center">

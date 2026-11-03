@@ -192,7 +192,7 @@ const ForgotPassword = ({ isAdmin = false }) => {
                     type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={isAdmin ? "admin_username" : "gumansingh.CitiCon@gmail.com"}
+                    placeholder={isAdmin ? "admin_username" : "employee@citicon.com"}
                     className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-[16px] text-sm font-bold text-slate-800 placeholder-slate-300 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
                     required
                   />

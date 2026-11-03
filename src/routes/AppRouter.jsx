@@ -64,7 +64,12 @@ const AppRouter = () => {
   }, [location.pathname]); // Re-verify settings on navigation to be responsive to changes
 
   const user = JSON.parse(localStorage.getItem('user')) || {};
-  const isSuperAdmin = user.role === 'admin' && user.email === 'gumansingh.CitiCon@gmail.com';
+  const isSuperAdmin = user.role === 'admin' && (
+    user.email === 'gumansingh.CitiCon@gmail.com' || 
+    user.email === 'gumansingh.citicon@gmail.com' || 
+    user.email === 'gumansingh.oditechglobal@gmail.com' ||
+    user.email === 'oditechofficial@gmail.com'
+  );
   const isPublicPath = location.pathname === '/' || 
                        location.pathname === '/login' || 
                        location.pathname === '/forgot-password' || 
