@@ -41,7 +41,7 @@ const EmployeeCard = ({ employee }) => {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-slate-400">
               <Briefcase size={12} className="flex-shrink-0" />
-              <span className="text-[11px] font-bold truncate">{employee.department || 'CitiCon'}</span>
+              <span className="text-[11px] font-bold truncate">{employee.department || 'NeoRen'}</span>
             </div>
             <div className="flex items-center gap-2 text-slate-400">
               <Mail size={12} className="flex-shrink-0" />
@@ -96,7 +96,7 @@ const EmployeeDirectory = () => {
   return (
     <EmployeeLayout
       title="Employee Directory"
-      subtitle={`Meet your colleagues at CitiCon (${employees.length} members).`}
+      subtitle={`Meet your colleagues at NeoRen (${employees.length} members).`}
     >
       <div className="space-y-6">
         <SearchHeader 

@@ -46,7 +46,7 @@ const LoginPage = ({ isAdmin = false }) => {
           
           <div className="text-center mb-10">
             <div className="text-text-muted text-[0.85rem] font-bold uppercase tracking-[1.5px] mb-2">
-              CitiCon Pvt. Ltd.
+              NeoRen Enterprise Pvt Ltd
             </div>
             <h1 className="text-text-main text-2xl font-semibold tracking-tight mb-2">
               {isAdmin ? 'Admin Portal' : 'Employee Portal'}

@@ -91,7 +91,7 @@ const MaintenanceMode = () => {
             <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <h1 className="text-base font-extrabold tracking-tight leading-none text-slate-800">CitiCon <span className="text-[10px] text-slate-400 font-normal">Pvt. Ltd.</span></h1>
+            <h1 className="text-base font-extrabold tracking-tight leading-none text-slate-800">NeoRen <span className="text-[10px] text-slate-400 font-normal">Enterprise Pvt Ltd</span></h1>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Innovate • Build • Elevate</p>
           </div>
         </div>
@@ -312,7 +312,7 @@ const MaintenanceMode = () => {
 
       {/* Footer credits */}
       <footer className="py-6 border-t border-slate-100 text-center text-xs font-semibold text-slate-400">
-        <p>© 2026 CitiCon. All rights reserved.</p>
+        <p>© 2026 NeoRen Enterprise. All rights reserved.</p>
       </footer>
 
     </div>

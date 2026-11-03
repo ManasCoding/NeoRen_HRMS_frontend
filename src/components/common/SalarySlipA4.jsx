@@ -32,7 +32,7 @@ const Header = ({ data, employee }) => {
         <div style={{ display: 'flex', gap: 0, alignItems: 'center' }}>
           {/* Logo - no circular crop */}
           <div style={{ width: 120, height: 110, display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
-            <img src="/logo.png" alt="CitiCon Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="/logo.png" alt="NeoRen Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none'; }} />
           </div>
 
           {/* Vertical divider */}
@@ -40,8 +40,8 @@ const Header = ({ data, employee }) => {
 
           {/* Company text info */}
           <div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#000', letterSpacing: 0.5, lineHeight: 1.1, marginBottom: 2 }}>CitiCon</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#333', marginBottom: 6, lineHeight: 1.2 }}>Pvt. Ltd</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#000', letterSpacing: 0.5, lineHeight: 1.1, marginBottom: 2 }}>NeoRen</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#333', marginBottom: 6, lineHeight: 1.2 }}>Enterprise Pvt Ltd</div>
             {/* Decorative underline: blue + gold */}
             <div style={{ display: 'flex', marginBottom: 12, height: 3, width: 140 }}>
               <div style={{ flex: 2, background: '#1e3a8a', borderRadius: '2px 0 0 2px' }}></div>
@@ -64,7 +64,7 @@ const Header = ({ data, employee }) => {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
                 </div> */}
                 <div style={{ width: 1, height: 14, backgroundColor: '#ccc' }}></div>
-                official@CitiCon.com
+                official@neoren.com
               </div>
               {/* Phone */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

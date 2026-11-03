@@ -11,14 +11,14 @@ const LandingPage = () => {
             <div className="w-20 h-20 rounded-[18px] overflow-hidden shadow-[0_8px_16px_rgba(15,23,42,0.12)]">
               <img
                 src="/logo.jpeg"
-                alt="CitiCon Logo"
+                alt="NeoRen Logo"
                 className="w-full h-full object-cover"
               />
             </div>
           </div>
 
           <div className="text-text-muted text-sm font-bold uppercase tracking-[1.5px] mb-3">
-            CitiCon Pvt. Ltd.
+            NeoRen Enterprise Pvt Ltd
           </div>
 
           <h1 className="text-text-main text-3xl font-bold tracking-tight mb-3">

@@ -55,7 +55,7 @@ const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
             <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-bold tracking-tight">CitiCon</span>
+          <span className="font-bold tracking-tight">NeoRen</span>
         </div>
         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -73,9 +73,9 @@ const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
             <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover p-1" />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white mb-1">CitiCon</h2>
+            <h2 className="text-xl font-bold tracking-tight text-white mb-1">NeoRen</h2>
             <p className="text-[11px] text-[#3b82f6] font-bold uppercase tracking-[0.15em]">Admin Panel</p>
-            <p className="text-[12px] text-[#64748b] font-medium truncate mt-1.5">{user?.email || 'admin@CitiCon.com'}</p>
+            <p className="text-[12px] text-[#64748b] font-medium truncate mt-1.5">{user?.email || 'admin@neoren.com'}</p>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
                   <p className="text-xs text-text-muted">Super User</p>
                 </div>
                 <div className="w-10 h-10 bg-slate-200 rounded-full border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
-                  <img src="/logo.jpeg" alt="CitiCon Logo" className="w-full h-full object-cover p-0.5 bg-white" />
+                  <img src="/logo.jpeg" alt="NeoRen Logo" className="w-full h-full object-cover p-0.5 bg-white" />
                 </div>
               </div>
             </div>

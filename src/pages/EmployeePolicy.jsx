@@ -238,7 +238,7 @@ const EmployeePolicy = () => {
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto;">
         <div style="text-align:center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 28px;">
           <h1 style="font-size:22px; font-weight:900; color:#0f172a; letter-spacing:2px; text-transform:uppercase; margin:0 0 6px 0;">OFFICE ORDER</h1>
-          <p style="font-size:11px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin:0;">CitiCon</p>
+          <p style="font-size:11px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin:0;">NeoRen Enterprise Pvt Ltd</p>
         </div>
         ${bodyHtml}
         <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 16px; font-size: 11px; color: #94a3b8; text-align: right;">

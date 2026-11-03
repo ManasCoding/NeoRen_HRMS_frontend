@@ -65,11 +65,11 @@ const EmployeeLayout = ({ children, title, subtitle }) => {
         {/* Logo */}
         <div className="hidden md:flex flex-col items-center gap-4 mb-10 px-2 text-center mt-4">
           <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center overflow-hidden shadow-lg shadow-black/20">
-            <img src="/logo.jpeg" alt="CitiCon" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<span class="text-2xl font-black text-amber-500">OG</span>'; }} />
+            <img src="/logo.jpeg" alt="NeoRen" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<span class="text-2xl font-black text-amber-500">NR</span>'; }} />
           </div>
           <div>
             <h2 className="text-xl font-bold tracking-widest text-white leading-tight">
-              CitiCon<br />GLOBAL
+              NeoRen<br />ENTERPRISE
             </h2>
             <p className="text-[11px] text-[#2563eb] font-bold uppercase tracking-[0.2em] mt-3">Employee Portal</p>
           </div>
@@ -155,7 +155,7 @@ const EmployeeLayout = ({ children, title, subtitle }) => {
           </p>
         </footer>
         <div className="py-6 text-center">
-          <p className="text-[11px] font-medium text-slate-400">© 2026 CitiCon. All rights reserved.</p>
+          <p className="text-[11px] font-medium text-slate-400">© 2026 NeoRen Enterprise. All rights reserved.</p>
         </div>
       </main>
     </div>

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, CheckCircle2, Calendar, Clock, ClipboardCheck,
@@ -254,11 +254,11 @@ const EmployeeResignationDetails = () => {
                   </div>
                 </div>
                 <div className="space-y-2 text-[11px] font-medium flex-1">
-                  <div className="flex items-center gap-2 text-blue-600"><Mail size={12} />official@CitiCon.com</div>
+                  <div className="flex items-center gap-2 text-blue-600"><Mail size={12} />official@neoren.com</div>
                   <div className="flex items-center gap-2 text-slate-600"><Phone size={12} />+91 9124670012</div>
                   <div className="flex items-center gap-2 text-slate-600"><MapPin size={12} />HR Department</div>
                 </div>
-                <a href="mailto:official@CitiCon.com" className="mt-4 flex items-center justify-center gap-2 w-full py-2 rounded-lg border border-blue-100 text-blue-600 text-[11px] font-bold hover:bg-blue-50 transition-colors">
+                <a href="mailto:official@neoren.com" className="mt-4 flex items-center justify-center gap-2 w-full py-2 rounded-lg border border-blue-100 text-blue-600 text-[11px] font-bold hover:bg-blue-50 transition-colors">
                   <Mail size={12} /> Send Email
                 </a>
               </div>

@@ -519,7 +519,7 @@ const AdminEmployeeDetails = () => {
     const dataRows = [];
 
     // Header info rows
-    dataRows.push(['CitiCon HRMS - WHOLE MONTH ATTENDANCE REPORT']);
+    dataRows.push(['NeoRen HRMS - WHOLE MONTH ATTENDANCE REPORT']);
     dataRows.push([`Employee Name: ${employee?.fullName || 'N/A'}`, `Employee ID: ${employee?.empCode || employee?._id || 'N/A'}`]);
     dataRows.push([`Department: ${employee?.department || 'N/A'}`, `Designation: ${employee?.role || 'N/A'}`]);
     dataRows.push([`Month & Year: ${monthName} ${currentYear}`, `Total Days in Month: ${totalDaysInMonth}`]);
