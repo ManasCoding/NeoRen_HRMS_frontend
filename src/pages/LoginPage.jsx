@@ -19,8 +19,9 @@ const LoginPage = ({ isAdmin = false }) => {
     setError('');
     
     try {
-      const finalLoginId = isAdmin ? loginId : `${getPrefix()}${employeeCode}`;
-      const data = await login(finalLoginId, password, isAdmin, isAdmin ? undefined : employeeType);
+      const finalLoginId = isAdmin ? loginId.trim() : `${getPrefix()}${employeeCode}`.trim();
+      const cleanPassword = password.trim();
+      const data = await login(finalLoginId, cleanPassword, isAdmin, isAdmin ? undefined : employeeType);
       if (data.success) {
         localStorage.setItem('user', JSON.stringify(data.user));
         if (data.token) localStorage.setItem('token', data.token);
