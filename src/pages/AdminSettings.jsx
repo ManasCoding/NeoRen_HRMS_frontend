@@ -63,8 +63,8 @@ const AdminSettings = () => {
     casual_leave: '12',
     sick_leave: '10',
     Holidays: '13',
-    office_lat: '20.296142',
-    office_lng: '85.833122',
+    office_lat: '20.440083',
+    office_lng: '85.841611',
     geofence_radius: '50',
     maintenance_mode: 'false',
     maintenance_message: 'System will be offline for 2 hours.'

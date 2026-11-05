@@ -12,7 +12,7 @@ const LoginPage = ({ isAdmin = false }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const getPrefix = () => employeeType === 'regular' ? 'OG25' : 'CK';
+  const getPrefix = () => employeeType === 'regular' ? 'DB25' : 'CK';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

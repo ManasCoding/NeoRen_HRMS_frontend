@@ -7,7 +7,7 @@ import SearchHeader from '../components/SearchHeader';
 
 const generateNextEmpCode = (existingEmployees) => {
   if (!existingEmployees || existingEmployees.length === 0) {
-    return 'OG251001';
+    return 'DB251001';
   }
   
   const codes = existingEmployees
@@ -15,11 +15,11 @@ const generateNextEmpCode = (existingEmployees) => {
     .filter(code => typeof code === 'string' && code.trim() !== '');
     
   if (codes.length === 0) {
-    return 'OG251001';
+    return 'DB251001';
   }
   
   let maxNum = -1;
-  let detectedPrefix = 'OG25';
+  let detectedPrefix = 'DB25';
   
   for (const code of codes) {
     // Match letters/symbols followed by numbers, e.g., "OG252523" or "OG25-001" or "EMP101"
@@ -43,7 +43,7 @@ const generateNextEmpCode = (existingEmployees) => {
     return `${detectedPrefix}${nextNumStr}`;
   }
   
-  return 'OG251001';
+  return 'DB251001';
 };
 
 const AdminEmployees = () => {

@@ -87,9 +87,9 @@ const AdminPromoteEmployeeDetails = () => {
       // Basic generation logic
       const numCode = codes.map(c => parseInt(c.replace(/\D/g, ''))).filter(n => !isNaN(n));
       const max = Math.max(...(numCode.length ? numCode : [1000]));
-      setFormData(prev => ({ ...prev, empCode: `OG25${max + 1}` }));
+      setFormData(prev => ({ ...prev, empCode: `DB25${max + 1}` }));
     } catch (error) {
-      setFormData(prev => ({ ...prev, empCode: `OG251001` }));
+      setFormData(prev => ({ ...prev, empCode: `DB251001` }));
     }
   };
 
