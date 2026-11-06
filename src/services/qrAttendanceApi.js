@@ -1,8 +1,9 @@
 import api from './api';
 
 // Public / Mobile Scanning Endpoints
-export const getOfficeQr = async () => {
-  const response = await api.get('/qr-attendance/office-qr');
+export const getOfficeQr = async (baseUrl) => {
+  const params = baseUrl ? { baseUrl } : {};
+  const response = await api.get('/qr-attendance/office-qr', { params });
   return response.data;
 };
 

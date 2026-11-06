@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import AdminLayout from '../layouts/AdminLayout';
 import { 
   QrCode, RefreshCw, Download, Printer, Maximize2, Minimize2, 
-  ShieldCheck, Clock, Settings, Sparkles, Check, AlertCircle, ExternalLink
+  ShieldCheck, Clock, Settings, Sparkles, Check, AlertCircle, ExternalLink, Globe, Wifi
 } from 'lucide-react';
 import { getOfficeQr, getQrSettings, updateQrSettings } from '../services/qrAttendanceApi';
 
@@ -15,13 +15,19 @@ const AdminQrManagement = () => {
   const [isKioskMode, setIsKioskMode] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // Portal URL state
+  const [targetUrl, setTargetUrl] = useState('https://neo-ren-hrms-frontend.vercel.app');
+  const [customUrlInput, setCustomUrlInput] = useState('');
+  const [isEditingUrl, setIsEditingUrl] = useState(false);
+
   const timerRef = useRef(null);
 
   // Fetch live QR token & data
-  const fetchQrCode = async () => {
+  const fetchQrCode = async (overrideUrl) => {
     try {
       setLoading(true);
-      const res = await getOfficeQr();
+      const urlToUse = overrideUrl !== undefined ? overrideUrl : targetUrl;
+      const res = await getOfficeQr(urlToUse);
       if (res.success) {
         setQrData(res);
         setCountdown(res.expirySeconds || 60);
@@ -34,8 +40,25 @@ const AdminQrManagement = () => {
     }
   };
 
+  // Initial load: get settings first then fetch QR
   useEffect(() => {
-    fetchQrCode();
+    const init = async () => {
+      try {
+        const settingsRes = await getQrSettings();
+        if (settingsRes.success && settingsRes.settings) {
+          const loadedUrl = settingsRes.settings.qr_frontend_url || 'https://neo-ren-hrms-frontend.vercel.app';
+          setTargetUrl(loadedUrl);
+          setCustomUrlInput(loadedUrl);
+          setExpirySetting(settingsRes.settings.qr_token_expiry_seconds || 60);
+          fetchQrCode(loadedUrl);
+        } else {
+          fetchQrCode();
+        }
+      } catch (e) {
+        fetchQrCode();
+      }
+    };
+    init();
   }, []);
 
   // Live countdown clock & auto-refresh
@@ -45,7 +68,7 @@ const AdminQrManagement = () => {
     timerRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          fetchQrCode();
+          fetchQrCode(targetUrl);
           return expirySetting;
         }
         return prev - 1;
@@ -56,16 +79,32 @@ const AdminQrManagement = () => {
       clearInterval(clockInterval);
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [expirySetting]);
+  }, [expirySetting, targetUrl]);
 
   const handleUpdateExpiry = async (newVal) => {
     try {
       setSavingSettings(true);
       await updateQrSettings({ qr_token_expiry_seconds: newVal });
       setExpirySetting(newVal);
-      fetchQrCode();
+      fetchQrCode(targetUrl);
     } catch (err) {
       console.error(err);
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleSaveUrl = async (newUrl) => {
+    try {
+      setSavingSettings(true);
+      const cleaned = (newUrl || '').trim().replace(/\/$/, '');
+      await updateQrSettings({ qr_frontend_url: cleaned });
+      setTargetUrl(cleaned);
+      setCustomUrlInput(cleaned);
+      setIsEditingUrl(false);
+      fetchQrCode(cleaned);
+    } catch (err) {
+      console.error('Failed to update QR portal URL:', err);
     } finally {
       setSavingSettings(false);
     }
@@ -98,54 +137,61 @@ const AdminQrManagement = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-black tracking-tight text-white">NEOREN ENTERPRISE</h1>
-                <p className="text-xs font-bold text-emerald-400 tracking-[0.2em] uppercase">Smart QR Attendance Terminal</p>
+                <p className="text-xs text-emerald-400 font-semibold tracking-wider uppercase">Smart QR Attendance Terminal</p>
               </div>
             </div>
 
             <div className="flex items-center gap-6">
-              <div className="text-right hidden sm:block">
-                <p className="text-2xl font-mono font-bold text-white tracking-wider">
-                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-                </p>
-                <p className="text-xs text-slate-400 font-medium">
-                  {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
-                </p>
+              <div className="text-right">
+                <div className="text-2xl font-black font-mono tracking-tight text-white">
+                  {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                </div>
+                <div className="text-xs font-semibold text-slate-400">
+                  {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+                </div>
               </div>
 
               <button
                 onClick={() => setIsKioskMode(false)}
-                className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition-all flex items-center gap-2 text-xs font-bold"
+                className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+                title="Exit Kiosk Mode"
               >
-                <Minimize2 size={18} />
-                <span>Exit Fullscreen</span>
+                <Minimize2 size={20} />
               </button>
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center my-auto py-6">
-            <div className="relative p-6 bg-white rounded-3xl shadow-2xl shadow-emerald-900/20 border-4 border-emerald-500/30 flex flex-col items-center">
-              {loading ? (
-                <div className="w-80 h-80 flex items-center justify-center">
-                  <RefreshCw size={40} className="animate-spin text-slate-400" />
-                </div>
-              ) : (
-                <img src={qrData?.qrDataUrl} alt="Office QR Code" className="w-80 h-80 sm:w-96 sm:h-96 object-contain rounded-2xl" />
-              )}
+          <div className="flex-1 flex flex-col items-center justify-center py-6 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6">
+              <Sparkles size={14} />
+              <span>Scan with Google Lens or Camera</span>
+            </div>
 
-              <div className="mt-4 flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">
-                <ShieldCheck size={16} className="text-emerald-600" />
-                <span>Refreshes in {countdown}s</span>
+            {/* Glowing Kiosk QR Frame */}
+            <div className="relative p-6 bg-white rounded-3xl shadow-2xl shadow-emerald-500/10 border-4 border-slate-800/60 flex flex-col items-center">
+              <img
+                src={qrData?.qrDataUrl}
+                alt="Office QR Code"
+                className="w-72 h-72 sm:w-96 sm:h-96 object-contain rounded-2xl"
+              />
+
+              <div className="mt-4 w-full">
+                <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-1.5 font-mono">
+                  <span>REFRESHING IN</span>
+                  <span className="text-emerald-600">{countdown}s</span>
+                </div>
+                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-linear"
+                    style={{ width: `${(countdown / expirySetting) * 100}%` }}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="mt-8 text-center max-w-md">
-              <h3 className="text-xl sm:text-2xl font-extrabold text-white">
-                Scan with Google Lens or Camera
-              </h3>
-              <p className="text-slate-400 text-xs sm:text-sm mt-1">
-                Point your phone camera to instantly record Check-In or Check-Out
-              </p>
-            </div>
+            <p className="mt-6 text-slate-400 text-sm max-w-md font-medium">
+              Point your smartphone camera or Google Lens to mark today's Check-In or Check-Out automatically.
+            </p>
           </div>
 
           <div className="border-t border-slate-800/80 pt-6 text-center text-xs text-slate-500 font-medium">
@@ -168,7 +214,7 @@ const AdminQrManagement = () => {
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={fetchQrCode}
+                  onClick={() => fetchQrCode(targetUrl)}
                   disabled={loading}
                   className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors flex items-center gap-1.5 text-xs font-semibold"
                   title="Force Regenerate Token"
@@ -217,10 +263,13 @@ const AdminQrManagement = () => {
               </div>
             </div>
 
-            {/* URL Target & Scan Instructions */}
+            {/* Scanned Destination URL Box */}
             <div className="mt-4 w-full max-w-md p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-left">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Scanned URL Destination</p>
-              <p className="font-mono text-xs text-blue-600 truncate">{qrData?.qrUrl || 'Generating...'}</p>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Google Lens Destination URL</p>
+                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Mobile Friendly</span>
+              </div>
+              <p className="font-mono text-xs text-blue-600 break-all">{qrData?.qrUrl || 'Generating...'}</p>
             </div>
 
             {/* Download & Print Buttons */}
@@ -243,8 +292,113 @@ const AdminQrManagement = () => {
             </div>
           </div>
 
-          {/* Settings & Security Information Side Panel */}
+          {/* Settings & Configuration Side Panel */}
           <div className="lg:col-span-5 space-y-6">
+            {/* Target Attendance Domain Configuration */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Globe size={18} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Attendance Portal Domain</h4>
+                  <p className="text-xs text-slate-500">The website opened when phone scans QR</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs text-slate-600">
+                  Select where you want employee mobile phones to land:
+                </p>
+
+                {/* Preset Options */}
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSaveUrl('https://neo-ren-hrms-frontend.vercel.app')}
+                    disabled={savingSettings}
+                    className={`w-full p-3 rounded-2xl border text-left flex items-start justify-between transition-all ${
+                      targetUrl === 'https://neo-ren-hrms-frontend.vercel.app'
+                        ? 'border-blue-500 bg-blue-50/40 text-blue-900 shadow-sm'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5 font-bold text-xs">
+                        <Globe size={13} className="text-blue-600" />
+                        <span>Live Production Cloud (Vercel)</span>
+                      </div>
+                      <p className="text-[11px] font-mono text-slate-500 mt-0.5">https://neo-ren-hrms-frontend.vercel.app</p>
+                    </div>
+                    {targetUrl === 'https://neo-ren-hrms-frontend.vercel.app' && (
+                      <Check size={16} className="text-blue-600 flex-shrink-0" />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSaveUrl('http://192.168.31.33:5173')}
+                    disabled={savingSettings}
+                    className={`w-full p-3 rounded-2xl border text-left flex items-start justify-between transition-all ${
+                      targetUrl === 'http://192.168.31.33:5173'
+                        ? 'border-blue-500 bg-blue-50/40 text-blue-900 shadow-sm'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5 font-bold text-xs">
+                        <Wifi size={13} className="text-emerald-600" />
+                        <span>Local Office Wi-Fi Testing (Local IP)</span>
+                      </div>
+                      <p className="text-[11px] font-mono text-slate-500 mt-0.5">http://192.168.31.33:5173</p>
+                    </div>
+                    {targetUrl === 'http://192.168.31.33:5173' && (
+                      <Check size={16} className="text-blue-600 flex-shrink-0" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Custom Domain Input */}
+                <div className="pt-2">
+                  {!isEditingUrl ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingUrl(true)}
+                      className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <Settings size={12} />
+                      <span>Enter Custom Domain / URL</span>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2 mt-2">
+                      <input
+                        type="url"
+                        value={customUrlInput}
+                        onChange={(e) => setCustomUrlInput(e.target.value)}
+                        placeholder="https://hrms.yourcompany.com"
+                        className="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:border-blue-500 font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveUrl(customUrlInput)}
+                        disabled={savingSettings || !customUrlInput}
+                        className="px-3 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingUrl(false)}
+                        className="px-2 py-2 text-slate-500 text-xs font-semibold hover:text-slate-700"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Expiry Settings Card */}
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
               <div className="flex items-center gap-2.5">
