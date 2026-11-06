@@ -16,7 +16,9 @@ import {
   X,
   FileMinus,
   FileSignature,
-  TrendingUp
+  TrendingUp,
+  QrCode,
+  ChevronDown
 } from 'lucide-react';
 
 const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
@@ -32,6 +34,15 @@ const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
     localStorage.removeItem('user');
     navigate('/');
   };
+
+  const isQrActive = location.pathname.startsWith('/admin/qr-') || location.pathname === '/admin/registered-devices';
+  const [isQrMenuOpen, setIsQrMenuOpen] = React.useState(true);
+
+  const qrSubmenu = [
+    { name: 'QR Attendance Dashboard', path: '/admin/qr-dashboard' },
+    { name: 'Registered Devices', path: '/admin/registered-devices' },
+    { name: 'QR Code Management', path: '/admin/qr-management' },
+  ];
 
   const navLinks = [
     { name: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/admin/dashboard' },
@@ -83,18 +94,65 @@ const AdminLayout = ({ children, title, subtitle, hideHeader = false }) => {
           {navLinks.map((link) => {
             const isActive = location.pathname === link.path;
             return (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-                  ? 'bg-white text-primary shadow-lg shadow-white/5'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
-                  }`}
-              >
-                {link.icon}
-                {link.name}
-              </Link>
+              <React.Fragment key={link.name}>
+                <Link
+                  to={link.path}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                    ? 'bg-white text-primary shadow-lg shadow-white/5'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  {link.icon}
+                  {link.name}
+                </Link>
+
+                {link.name === 'Attendance Management' && (
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsQrMenuOpen(!isQrMenuOpen)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                        isQrActive
+                          ? 'bg-emerald-500/20 text-emerald-300 font-bold'
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <QrCode size={18} className={isQrActive ? 'text-emerald-400' : ''} />
+                        <span className="truncate">QR Attendance</span>
+                      </div>
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-200 flex-shrink-0 ${isQrMenuOpen ? 'rotate-180 text-emerald-400' : 'text-white/40'}`}
+                      />
+                    </button>
+
+                    {isQrMenuOpen && (
+                      <div className="pl-4 pr-1 mt-1 space-y-1 border-l-2 border-emerald-500/40 ml-5 my-1">
+                        {qrSubmenu.map((sub) => {
+                          const isSubActive = location.pathname === sub.path;
+                          return (
+                            <Link
+                              key={sub.name}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                                isSubActive
+                                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20'
+                                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isSubActive ? 'bg-slate-950' : 'bg-emerald-400'}`} />
+                              <span className="truncate">{sub.name}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </React.Fragment>
             );
           })}
         </nav>

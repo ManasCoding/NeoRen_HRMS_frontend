@@ -41,6 +41,11 @@ import EmployeeSiteVisitRequest from '../pages/EmployeeSiteVisitRequest';
 import MaintenanceMode from '../pages/MaintenanceMode';
 import api from '../services/api';
 
+import QrAttendancePage from '../pages/QrAttendancePage';
+import AdminQrDashboard from '../pages/AdminQrDashboard';
+import AdminRegisteredDevices from '../pages/AdminRegisteredDevices';
+import AdminQrManagement from '../pages/AdminQrManagement';
+
 const AppRouter = () => {
   const location = useLocation();
   const [maintenance, setMaintenance] = useState(null);
@@ -74,7 +79,8 @@ const AppRouter = () => {
                        location.pathname === '/login' || 
                        location.pathname === '/forgot-password' || 
                        location.pathname === '/admin/login' || 
-                       location.pathname === '/admin/forgot-password';
+                       location.pathname === '/admin/forgot-password' ||
+                       location.pathname.startsWith('/qr-attendance');
 
   if (loadingSettings) {
     return (
@@ -95,6 +101,8 @@ const AppRouter = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/admin/login" element={<LoginPage isAdmin={true} />} />
       <Route path="/admin/forgot-password" element={<ForgotPassword isAdmin={true} />} />
+      {/* Smart QR Attendance Route */}
+      <Route path="/qr-attendance" element={<QrAttendancePage />} />
       
       {/* Employee Routes */}
       <Route path="/employee/:employeeSlug/dashboard" element={<EmployeeDashboard />} />
@@ -131,6 +139,11 @@ const AppRouter = () => {
       <Route path="/admin/site-visits" element={<AdminSiteVisits />} />
       <Route path="/admin/resignations" element={<AdminResignation />} />
       <Route path="/admin/resignations/:id" element={<AdminResignationDetails />} />
+
+      {/* Smart QR Attendance Admin Routes */}
+      <Route path="/admin/qr-dashboard" element={<AdminQrDashboard />} />
+      <Route path="/admin/registered-devices" element={<AdminRegisteredDevices />} />
+      <Route path="/admin/qr-management" element={<AdminQrManagement />} />
 
       
       {/* Fallback for other pages while they are being built */}
