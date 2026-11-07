@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import AdminLayout from '../layouts/AdminLayout';
 import { 
   QrCode, RefreshCw, Download, Printer, Maximize2, Minimize2, 
-  ShieldCheck, Clock, Settings, Sparkles, Check, AlertCircle, ExternalLink, Globe, Wifi
+  ShieldCheck, Clock, Settings, Sparkles, Check, AlertCircle, ExternalLink, Globe, Wifi, CheckCircle2
 } from 'lucide-react';
-import { getOfficeQr, getQrSettings, updateQrSettings } from '../services/qrAttendanceApi';
+import { getOfficeQr, getPermanentQr, getQrSettings, updateQrSettings } from '../services/qrAttendanceApi';
 
 const AdminQrManagement = () => {
   const [loading, setLoading] = useState(true);
+  const [qrType, setQrType] = useState('permanent'); // 'permanent' (default) or 'dynamic'
   const [qrData, setQrData] = useState(null);
   const [countdown, setCountdown] = useState(60);
   const [expirySetting, setExpirySetting] = useState(60);
@@ -22,25 +23,34 @@ const AdminQrManagement = () => {
 
   const timerRef = useRef(null);
 
-  // Fetch live QR token & data
-  const fetchQrCode = async (overrideUrl) => {
+  // Fetch QR Code based on mode
+  const fetchQrCode = async (overrideType, overrideUrl) => {
     try {
       setLoading(true);
+      const mode = overrideType || qrType;
       const urlToUse = overrideUrl !== undefined ? overrideUrl : targetUrl;
-      const res = await getOfficeQr(urlToUse);
-      if (res.success) {
-        setQrData(res);
-        setCountdown(res.expirySeconds || 60);
-        setExpirySetting(res.expirySeconds || 60);
+
+      if (mode === 'permanent') {
+        const res = await getPermanentQr(urlToUse);
+        if (res.success) {
+          setQrData(res);
+        }
+      } else {
+        const res = await getOfficeQr(urlToUse);
+        if (res.success) {
+          setQrData(res);
+          setCountdown(res.expirySeconds || 60);
+          setExpirySetting(res.expirySeconds || 60);
+        }
       }
     } catch (err) {
-      console.error('Failed to generate live office QR:', err);
+      console.error('Failed to generate office QR:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial load: get settings first then fetch QR
+  // Initial load
   useEffect(() => {
     const init = async () => {
       try {
@@ -50,43 +60,52 @@ const AdminQrManagement = () => {
           setTargetUrl(loadedUrl);
           setCustomUrlInput(loadedUrl);
           setExpirySetting(settingsRes.settings.qr_token_expiry_seconds || 60);
-          fetchQrCode(loadedUrl);
+          fetchQrCode('permanent', loadedUrl);
         } else {
-          fetchQrCode();
+          fetchQrCode('permanent');
         }
       } catch (e) {
-        fetchQrCode();
+        fetchQrCode('permanent');
       }
     };
     init();
   }, []);
 
-  // Live countdown clock & auto-refresh
+  // Countdown timer (only active in dynamic token mode)
   useEffect(() => {
     const clockInterval = setInterval(() => setCurrentTime(new Date()), 1000);
 
-    timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          fetchQrCode(targetUrl);
-          return expirySetting;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (qrType === 'dynamic') {
+      timerRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            fetchQrCode('dynamic', targetUrl);
+            return expirySetting;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
 
     return () => {
       clearInterval(clockInterval);
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [expirySetting, targetUrl]);
+  }, [qrType, expirySetting, targetUrl]);
+
+  const handleSwitchType = (type) => {
+    setQrType(type);
+    fetchQrCode(type, targetUrl);
+  };
 
   const handleUpdateExpiry = async (newVal) => {
     try {
       setSavingSettings(true);
       await updateQrSettings({ qr_token_expiry_seconds: newVal });
       setExpirySetting(newVal);
-      fetchQrCode(targetUrl);
+      if (qrType === 'dynamic') {
+        fetchQrCode('dynamic', targetUrl);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -102,7 +121,7 @@ const AdminQrManagement = () => {
       setTargetUrl(cleaned);
       setCustomUrlInput(cleaned);
       setIsEditingUrl(false);
-      fetchQrCode(cleaned);
+      fetchQrCode(qrType, cleaned);
     } catch (err) {
       console.error('Failed to update QR portal URL:', err);
     } finally {
@@ -114,7 +133,7 @@ const AdminQrManagement = () => {
     if (!qrData?.qrDataUrl) return;
     const a = document.createElement('a');
     a.href = qrData.qrDataUrl;
-    a.download = `Oditech_Office_QR_${Date.now()}.png`;
+    a.download = `NeoRen_Office_Permanent_QR.png`;
     a.click();
   };
 
@@ -125,7 +144,7 @@ const AdminQrManagement = () => {
   return (
     <AdminLayout
       title="QR Code Management"
-      subtitle="Dynamic, cryptographically signed office QR code terminal for Google Lens and mobile attendance."
+      subtitle="Permanent office QR code standee & auto-attendance terminal for Google Lens and phone cameras."
     >
       {/* Full-Screen Kiosk Mode (for Office Reception / Wall Display) */}
       {isKioskMode ? (
@@ -175,27 +194,34 @@ const AdminQrManagement = () => {
                 className="w-72 h-72 sm:w-96 sm:h-96 object-contain rounded-2xl"
               />
 
-              <div className="mt-4 w-full">
-                <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-1.5 font-mono">
-                  <span>REFRESHING IN</span>
-                  <span className="text-emerald-600">{countdown}s</span>
+              {qrType === 'dynamic' ? (
+                <div className="mt-4 w-full">
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-1.5 font-mono">
+                    <span>REFRESHING IN</span>
+                    <span className="text-emerald-600">{countdown}s</span>
+                  </div>
+                  <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${(countdown / expirySetting) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-linear"
-                    style={{ width: `${(countdown / expirySetting) * 100}%` }}
-                  />
+              ) : (
+                <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                  <CheckCircle2 size={13} />
+                  <span>Permanent Office QR • Never Expires</span>
                 </div>
-              </div>
+              )}
             </div>
 
-            <p className="mt-6 text-slate-400 text-sm max-w-md font-medium">
-              Point your smartphone camera or Google Lens to mark today's Check-In or Check-Out automatically.
+            <p className="mt-6 text-slate-300 text-sm max-w-md font-medium">
+              Log in once on Day 1. Next time, Google Lens marks Check-In / Check-Out automatically without password!
             </p>
           </div>
 
           <div className="border-t border-slate-800/80 pt-6 text-center text-xs text-slate-500 font-medium">
-            Oditech HRMS • Anti-Spoofing Signed Token Security Enabled
+            Oditech HRMS • Smart One-Tap Mobile Device Binding Enabled
           </div>
         </div>
       ) : null}
@@ -206,21 +232,45 @@ const AdminQrManagement = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* QR Terminal Card */}
           <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
-            <div className="w-full flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Live Office QR Terminal</span>
+            {/* Header with Type Switcher */}
+            <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 mb-6">
+              <div className="flex p-1 bg-slate-100 rounded-2xl w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => handleSwitchType('permanent')}
+                  className={`flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    qrType === 'permanent'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Sparkles size={13} className="text-emerald-500" />
+                  <span>Permanent Fixed QR (Recommended)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSwitchType('dynamic')}
+                  className={`flex-1 sm:flex-initial py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    qrType === 'dynamic'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Clock size={13} />
+                  <span>Dynamic 60s QR</span>
+                </button>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => fetchQrCode(targetUrl)}
+                  onClick={() => fetchQrCode(qrType, targetUrl)}
                   disabled={loading}
                   className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors flex items-center gap-1.5 text-xs font-semibold"
-                  title="Force Regenerate Token"
+                  title="Reload QR Code"
                 >
                   <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                  <span>Regenerate</span>
+                  <span>Refresh</span>
                 </button>
 
                 <button
@@ -234,6 +284,27 @@ const AdminQrManagement = () => {
               </div>
             </div>
 
+            {/* Permanent vs Dynamic Status Banner */}
+            <div className="w-full mb-3">
+              {qrType === 'permanent' ? (
+                <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-2xl text-emerald-900 text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-left">
+                    <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
+                    <span>Fixed Permanent Office Standee QR — Never Expires!</span>
+                  </div>
+                  <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider">Permanent</span>
+                </div>
+              ) : (
+                <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-2xl text-amber-900 text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-left">
+                    <Clock size={16} className="text-amber-600 flex-shrink-0" />
+                    <span>Rotating Token QR — Refreshes every {expirySetting}s for kiosk screen protection</span>
+                  </div>
+                  <span className="text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider">Expiring</span>
+                </div>
+              )}
+            </div>
+
             {/* QR Code Container */}
             <div className="p-5 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 relative my-2">
               {loading ? (
@@ -243,31 +314,35 @@ const AdminQrManagement = () => {
               ) : (
                 <img
                   src={qrData?.qrDataUrl}
-                  alt="Dynamic Office QR Code"
+                  alt="Office QR Code"
                   className="w-64 h-64 sm:w-72 sm:h-72 object-contain bg-white p-3 rounded-2xl shadow-md"
                 />
               )}
 
-              {/* Progress bar indicating remaining token lifetime */}
-              <div className="mt-4 w-full">
-                <div className="flex justify-between items-center text-[11px] font-bold text-slate-500 mb-1">
-                  <span>Token Auto-Refresh</span>
-                  <span className="text-emerald-600 font-mono">{countdown}s remaining</span>
+              {/* Progress bar (only for dynamic mode) */}
+              {qrType === 'dynamic' && (
+                <div className="mt-4 w-full">
+                  <div className="flex justify-between items-center text-[11px] font-bold text-slate-500 mb-1">
+                    <span>Token Auto-Refresh</span>
+                    <span className="text-emerald-600 font-mono">{countdown}s remaining</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${(countdown / expirySetting) * 100}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-linear"
-                    style={{ width: `${(countdown / expirySetting) * 100}%` }}
-                  />
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Scanned Destination URL Box */}
             <div className="mt-4 w-full max-w-md p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-left">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Google Lens Destination URL</p>
-                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Mobile Friendly</span>
+                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  {qrType === 'permanent' ? 'Permanent Standee URL' : 'Expiring Token URL'}
+                </span>
               </div>
               <p className="font-mono text-xs text-blue-600 break-all">{qrData?.qrUrl || 'Generating...'}</p>
             </div>
@@ -279,7 +354,7 @@ const AdminQrManagement = () => {
                 className="flex-1 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors flex items-center justify-center gap-2"
               >
                 <Download size={15} />
-                <span>Download PNG</span>
+                <span>Download Standee PNG</span>
               </button>
 
               <button
@@ -294,6 +369,31 @@ const AdminQrManagement = () => {
 
           {/* Settings & Configuration Side Panel */}
           <div className="lg:col-span-5 space-y-6">
+            {/* How QR Attendance Works Card */}
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-sm space-y-4">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+                <ShieldCheck size={16} />
+                <span>1-Tap Attendance Architecture</span>
+              </div>
+
+              <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0">1</div>
+                  <p><strong className="text-white">Day 1 (Scan & Login):</strong> Employee scans this office QR code. Logs in once with their Employee ID & password. Their mobile phone is securely bound automatically.</p>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0">2</div>
+                  <p><strong className="text-white">Day 2 Onward (No Login!):</strong> Employee points Google Lens or camera at this QR code. The system auto-verifies their registered device and immediately marks <strong className="text-emerald-400">Check-In</strong> (Morning) or <strong className="text-blue-400">Check-Out</strong> (Evening)!</p>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0">3</div>
+                  <p><strong className="text-white">Permanent & Printable:</strong> You can print this QR code on a counter standee, poster, or wall plaque. It never expires.</p>
+                </div>
+              </div>
+            </div>
+
             {/* Target Attendance Domain Configuration */}
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
               <div className="flex items-center gap-2.5">
@@ -307,11 +407,6 @@ const AdminQrManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <p className="text-xs text-slate-600">
-                  Select where you want employee mobile phones to land:
-                </p>
-
-                {/* Preset Options */}
                 <div className="space-y-2">
                   <button
                     type="button"
@@ -367,7 +462,7 @@ const AdminQrManagement = () => {
                       className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"
                     >
                       <Settings size={12} />
-                      <span>Enter Custom Domain / URL</span>
+                      <span>Enter Custom Company Domain</span>
                     </button>
                   ) : (
                     <div className="flex items-center gap-2 mt-2">
@@ -399,26 +494,19 @@ const AdminQrManagement = () => {
               </div>
             </div>
 
-            {/* Expiry Settings Card */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                  <Clock size={18} />
+            {/* Dynamic Token Settings (Visible if dynamic mode selected) */}
+            {qrType === 'dynamic' && (
+              <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <Clock size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">QR Expiry Configuration</h4>
+                    <p className="text-xs text-slate-500">Auto-refresh seconds</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900">QR Token Expiry Configuration</h4>
-                  <p className="text-xs text-slate-500">Security refresh frequency</p>
-                </div>
-              </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Dynamic tokens automatically invalidate old screenshots so employees cannot photograph the QR code and scan from home.
-              </p>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2">
-                  Select Token Refresh Duration:
-                </label>
                 <div className="grid grid-cols-4 gap-2">
                   {[30, 60, 90, 120].map((sec) => (
                     <button
@@ -437,32 +525,7 @@ const AdminQrManagement = () => {
                   ))}
                 </div>
               </div>
-            </div>
-
-            {/* How QR Attendance Works */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 rounded-3xl text-white shadow-sm space-y-4">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
-                <ShieldCheck size={16} />
-                <span>Smart Verification Architecture</span>
-              </div>
-
-              <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
-                <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[10px] flex-shrink-0 text-white">1</div>
-                  <p><strong className="text-white">Day 1 Setup:</strong> Employee scans this code using Google Lens or default camera, logs in once with Employee ID and password, and binds their mobile phone.</p>
-                </div>
-
-                <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[10px] flex-shrink-0 text-white">2</div>
-                  <p><strong className="text-white">Day 2 Onward:</strong> Employee points camera at the screen. The backend immediately identifies their bound device and marks Check-In or Check-Out without any login.</p>
-                </div>
-
-                <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[10px] flex-shrink-0 text-white">3</div>
-                  <p><strong className="text-white">1 Active Device Limit:</strong> Only one registered phone is permitted per employee to prevent attendance buddy-punching.</p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

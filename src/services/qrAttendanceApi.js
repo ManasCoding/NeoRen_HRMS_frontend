@@ -7,6 +7,12 @@ export const getOfficeQr = async (baseUrl) => {
   return response.data;
 };
 
+export const getPermanentQr = async (baseUrl) => {
+  const params = baseUrl ? { baseUrl } : {};
+  const response = await api.get('/qr-attendance/permanent-qr', { params });
+  return response.data;
+};
+
 export const verifyQrToken = async (qrToken) => {
   const response = await api.post('/qr-attendance/verify-token', { qrToken });
   return response.data;

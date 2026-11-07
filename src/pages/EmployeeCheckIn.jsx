@@ -1,20 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, CheckCircle2, AlertCircle, Loader2, Navigation, ArrowLeft, Clock, XCircle, Hourglass, ThumbsUp } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, ArrowLeft, Clock, XCircle, Hourglass, ThumbsUp, LogIn } from 'lucide-react';
 import EmployeeLayout from '../layouts/EmployeeLayout';
 import api from '../services/api';
-
-const EARTH_RADIUS_M = 6371000;
-
-function getDistanceMeters(lat1, lng1, lat2, lng2) {
-  const toRad = (v) => (v * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return EARTH_RADIUS_M * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 // Format a Date object or ISO string as "h:mm AM/PM"
 function fmtTime(d) {
@@ -31,95 +19,78 @@ const EmployeeCheckIn = () => {
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [coords, setCoords] = useState(null);
-  const [distance, setDistance] = useState(null);
   const [attendance, setAttendance] = useState(null);
 
-  const handleFindLocation = async () => {
+  const handleCheckIn = async () => {
     setStatus('locating');
     setMessage('');
 
-    if (!navigator.geolocation) {
-      setStatus('failed');
-      setMessage('Geolocation is not supported by your browser.');
-      return;
+    // Optional GPS capture (will not block if denied or unavailable)
+    let latitude = null;
+    let longitude = null;
+
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      try {
+        const pos = await new Promise((resolve) => {
+          navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 2500 });
+        });
+        if (pos?.coords) {
+          latitude = pos.coords.latitude;
+          longitude = pos.coords.longitude;
+          setCoords({ lat: latitude, lng: longitude });
+        }
+      } catch (e) {
+        // Geofencing is removed - location failure is ignored
+      }
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        setCoords({ lat: latitude, lng: longitude });
+    try {
+      const checkInRes = await api.post('/employee/attendance/check-in', {
+        employeeId: user.id,
+        lat: latitude,
+        lng: longitude,
+      });
 
-        try {
-          // Fetch office settings
-          const settingsRes = await api.get('/settings');
-          const settings = settingsRes.data.settings;
-
-          const officeLat = parseFloat(settings.office_lat);
-          const officeLng = parseFloat(settings.office_lng);
-          const radius = parseFloat(settings.geofence_radius) || 50;
-
-          const dist = getDistanceMeters(latitude, longitude, officeLat, officeLng);
-          setDistance(Math.round(dist));
-
-          if (dist <= radius) {
-            // Within geofence — check in
-            const checkInRes = await api.post('/employee/attendance/check-in', {
-              employeeId: user.id,
-              lat: latitude,
-              lng: longitude,
-            });
-
-            const data = checkInRes.data;
-            if (!data.success) {
-              setStatus('failed');
-              setMessage(data.message || 'Check-in failed. Please try again.');
-              return;
-            }
-
-            const att = data.attendance;
-            setAttendance(att);
-
-            if (data.alreadyCheckedIn) {
-              // Already checked in today — show appropriate status
-              const approvalStatus = att?.checkInApprovalStatus;
-              if (approvalStatus === 'Pending') {
-                setStatus('late_pending');
-              } else if (approvalStatus === 'Approved') {
-                setStatus('late_approved');
-              } else if (approvalStatus === 'Rejected') {
-                setStatus('late_rejected');
-              } else {
-                setStatus('already');
-                setMessage('You have already checked in today. Your attendance is recorded.');
-              }
-            } else if (data.lateApprovalPending) {
-              setStatus('late_pending');
-            } else {
-              setStatus('success');
-              setMessage(`Check-in successful! You are ${Math.round(dist)}m from office.`);
-              setTimeout(() => navigate(`/employee/${user.slug}/dashboard`), 2500);
-            }
-          } else {
-            setStatus('failed');
-            setMessage(`You are ${Math.round(dist)}m away from the office. Geofence radius is ${radius}m.`);
-          }
-        } catch (err) {
-          setStatus('failed');
-          setMessage('Could not verify location. Please try again.');
-        }
-      },
-      (error) => {
+      const data = checkInRes.data;
+      if (!data.success) {
         setStatus('failed');
-        setMessage('Location access denied. Please allow location access.');
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+        setMessage(data.message || 'Check-in failed. Please try again.');
+        return;
+      }
+
+      const att = data.attendance;
+      setAttendance(att);
+
+      if (data.alreadyCheckedIn) {
+        // Already checked in today — show appropriate status
+        const approvalStatus = att?.checkInApprovalStatus;
+        if (approvalStatus === 'Pending') {
+          setStatus('late_pending');
+        } else if (approvalStatus === 'Approved') {
+          setStatus('late_approved');
+        } else if (approvalStatus === 'Rejected') {
+          setStatus('late_rejected');
+        } else {
+          setStatus('already');
+          setMessage('You have already checked in today. Your attendance is recorded.');
+        }
+      } else if (data.lateApprovalPending) {
+        setStatus('late_pending');
+      } else {
+        setStatus('success');
+        setMessage('Check-in successful! Welcome to work.');
+        setTimeout(() => navigate(`/employee/${user.slug}/dashboard`), 2500);
+      }
+    } catch (err) {
+      setStatus('failed');
+      setMessage(err.response?.data?.message || 'Check-in failed. Please try again.');
+    }
   };
 
   const slug = user.slug || employeeSlug;
 
   return (
-    <EmployeeLayout title="Attendance Check-In" subtitle="Secured location verification for your work logs.">
+    <EmployeeLayout title="Attendance Check-In" subtitle="Mark your attendance from anywhere.">
       <div className="max-w-2xl mx-auto pb-20">
         
         {/* Header Section */}
@@ -131,10 +102,10 @@ const EmployeeCheckIn = () => {
             <ArrowLeft size={14} /> Back to Dashboard
           </button>
           <div className="w-20 h-20 bg-[#1e293b] rounded-[32px] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-slate-200">
-            <MapPin size={32} className="text-white" />
+            <LogIn size={32} className="text-white" />
           </div>
-          <h2 className="text-4xl font-black text-[#1e293b] mb-2">Location Verification</h2>
-          <p className="text-slate-400 text-sm font-medium">You must be within the office premises to mark your attendance.</p>
+          <h2 className="text-4xl font-black text-[#1e293b] mb-2">Daily Check-In</h2>
+          <p className="text-slate-400 text-sm font-medium">Record your check-in time and start your workday from anywhere.</p>
         </div>
 
         <div className="bg-white rounded-[48px] border border-slate-100 shadow-sm overflow-hidden p-10 relative">
@@ -174,7 +145,7 @@ const EmployeeCheckIn = () => {
             {status === 'locating' && (
               <div className="py-8 flex flex-col items-center gap-4 animate-pulse">
                 <Loader2 size={40} className="text-[#1e293b] animate-spin" />
-                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Verifying Coordinates...</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Recording Check-In...</p>
               </div>
             )}
 
@@ -196,11 +167,11 @@ const EmployeeCheckIn = () => {
               </div>
             )}
 
-            {/* Location / geofence failure */}
+            {/* Failure */}
             {status === 'failed' && (
               <div className="p-8 bg-rose-50 rounded-[32px] border border-rose-100 text-center animate-in zoom-in duration-300">
                 <XCircle size={48} className="text-rose-500 mx-auto mb-4" />
-                <h3 className="text-xl font-black text-rose-900 mb-1">Verification Failed</h3>
+                <h3 className="text-xl font-black text-rose-900 mb-1">Check-In Failed</h3>
                 <p className="text-rose-600 text-xs font-bold uppercase tracking-widest">{message}</p>
               </div>
             )}
@@ -309,17 +280,17 @@ const EmployeeCheckIn = () => {
             {status !== 'success' && status !== 'already' && status !== 'locating'
               && status !== 'late_pending' && status !== 'late_approved' && status !== 'late_rejected' && (
               <button
-                onClick={handleFindLocation}
+                onClick={handleCheckIn}
                 className="w-full py-6 bg-[#1e293b] text-white rounded-[32px] font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-slate-300 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4"
               >
-                <Navigation size={20} />
-                Verify Location &amp; Check In
+                <LogIn size={20} />
+                Check In Now
               </button>
             )}
 
             {status === 'locating' && (
               <div className="w-full py-6 bg-slate-100 text-slate-400 rounded-[32px] font-black text-sm uppercase tracking-[0.2em] text-center">
-                Fetching GPS Signal...
+                Processing Check-In...
               </div>
             )}
 
@@ -343,7 +314,7 @@ const EmployeeCheckIn = () => {
         </div>
         
         <p className="mt-10 text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest px-10 leading-relaxed">
-          Official check-in time is 9:30 AM. Late arrivals require Admin approval. Your GPS must be enabled and you must be within the office radius.
+          Official check-in time is 9:30 AM. Late arrivals require Admin approval. You can check in from anywhere.
         </p>
       </div>
     </EmployeeLayout>
